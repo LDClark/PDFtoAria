@@ -1,0 +1,95 @@
+<Window x:Class="PDFtoAria.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:cm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        mc:Ignorable="d" 
+        Height="700" Width="800">
+    <Window.Resources>
+        <CollectionViewSource x:Key="Files" Source="{Binding Files}">
+            <CollectionViewSource.SortDescriptions>
+                <cm:SortDescription PropertyName="CreationTime" Direction="Descending"/>
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+    </Window.Resources>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding GetFilesCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="2*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0">
+            <StackPanel>
+                <TextBlock Text="PDFs in directory:" HorizontalAlignment="Left" />
+                <Button Content="Refresh" HorizontalAlignment="Right" Command="{Binding GetFilesCommand}"/>
+                <ListBox 
+                     DockPanel.Dock="Top"
+                     ItemsSource="{Binding Source={StaticResource Files}}"
+                     SelectedItem="{Binding SelectedFile, NotifyOnSourceUpdated=True}">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="SourceUpdated">
+                            <i:InvokeCommandAction Command="{Binding GetPDFCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+                <TextBlock Text="{Binding Directory}"/>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="3*"/>
+                <RowDefinition Height="6*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <Label Content="Patient ID:" Grid.Row="0" Grid.Column="0"/>
+                <Label Content="Date of service:" Grid.Row="1" Grid.Column="0"/>
+                <Label Content="Date entered:" Grid.Row="2" Grid.Column="0"/>
+                <Label Content="Authored by:" Grid.Row="3" Grid.Column="0"/>
+                <Label Content="Supervised by:" Grid.Row="4" Grid.Column="0"/>
+                <Label Content="Entered by:" Grid.Row="5" Grid.Column="0"/>
+                <Label Content="Document type:" Grid.Row="6" Grid.Column="0"/>
+                <Label Content="Template name:" Grid.Row="7" Grid.Column="0"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PatientId}"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DateOfService}"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DateEntered}"/>
+                <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding AuthoredByUser.SingleUserId}"/>
+                <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EnteredByUser.SingleUserId}"/>
+                <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding SupervisedByUser.SingleUserId}"/>
+                <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding DocumentType.DocumentTypeDescription}"/>
+                <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding TemplateName}"/>
+            </Grid>
+            <Grid Grid.Row="1">
+                <WebBrowser  />
+            </Grid>
+            <Grid Grid.Row="2">
+                <Button Content="Upload to Aria" Width="100" Height="30" Margin="15" HorizontalAlignment="Right" Command="{Binding UploadToAriaCommand}"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>
