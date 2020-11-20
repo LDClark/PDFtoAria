@@ -43,7 +43,7 @@
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
-                <TextBlock Text="{Binding Directory}"/>
+                <TextBlock Text="{Binding Directory}" TextWrapping="Wrap"/>
             </StackPanel>
         </Grid>
         <Grid Grid.Column="1">
