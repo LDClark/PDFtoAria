@@ -123,10 +123,7 @@ namespace PDFtoAria
         {
             DirectoryInfo dir = new DirectoryInfo(Directory);
             Files = dir.GetFiles("*.pdf");
-            DateOfService = $"/Date({Math.Floor((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)})/";
-            DateEntered = $"/Date({Math.Floor((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)})/";
-            TemplateName = SelectedFile.FullName.Split('\\').Last().Split('.').First();
-            BinaryContent = File.ReadAllBytes(SelectedFile.FullName);
+            GetPDF();  //refresh or default loaded
         }
         public void GetPDF()
         {
