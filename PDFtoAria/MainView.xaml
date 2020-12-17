@@ -30,16 +30,17 @@
                 <Button Content="Refresh" HorizontalAlignment="Right" Command="{Binding GetFilesCommand}"/>
                 <ListBox 
                      DockPanel.Dock="Top"
-                     ItemsSource="{Binding Source={StaticResource Files}}"
-                     SelectedItem="{Binding SelectedFile, NotifyOnSourceUpdated=True}">
-                    <i:Interaction.Triggers>
-                        <i:EventTrigger EventName="SourceUpdated">
-                            <i:InvokeCommandAction Command="{Binding GetPDFCommand}" />
-                        </i:EventTrigger>
-                    </i:Interaction.Triggers>
+                     ItemsSource="{Binding Source = {StaticResource Files}}"
+                     SelectionMode="Multiple"
+                     >
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListBoxItem}">
+                            <Setter Property="IsSelected" Value="{Binding Mode=TwoWay, Path=IsSelected}"/>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Name}"/>
+                            <TextBlock Text="{Binding FileName}"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
@@ -75,20 +76,33 @@
                 <Label Content="Entered by:" Grid.Row="5" Grid.Column="0"/>
                 <Label Content="Document type:" Grid.Row="6" Grid.Column="0"/>
                 <Label Content="Template name:" Grid.Row="7" Grid.Column="0"/>
-                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PatientId}"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding PatientId}" x:Name="patientIdTextBox" />
                 <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding DateOfService}"/>
                 <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding DateEntered}"/>
                 <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding AuthoredByUser.SingleUserId}"/>
                 <TextBox Grid.Row="4" Grid.Column="1" Text="{Binding EnteredByUser.SingleUserId}"/>
                 <TextBox Grid.Row="5" Grid.Column="1" Text="{Binding SupervisedByUser.SingleUserId}"/>
                 <TextBox Grid.Row="6" Grid.Column="1" Text="{Binding DocumentType.DocumentTypeDescription}"/>
-                <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding TemplateName}"/>
+                <TextBox Grid.Row="7" Grid.Column="1" Text="{Binding TemplateName}" x:Name="templateNameTextBox"/>
             </Grid>
             <Grid Grid.Row="1">
                 <WebBrowser  />
             </Grid>
             <Grid Grid.Row="2">
-                <Button Content="Upload to Aria" Width="100" Height="30" Margin="15" HorizontalAlignment="Right" Command="{Binding UploadToAriaCommand}"/>
+                <Button Content="Upload to Aria" Width="100" Height="30" Margin="15" HorizontalAlignment="Right" Command="{Binding UploadToAriaCommand}">
+                    <Button.Style>
+                        <Style TargetType="{x:Type Button}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Text.Length, ElementName=patientIdTextBox, UpdateSourceTrigger=PropertyChanged}" Value="0">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Text.Length, ElementName=templateNameTextBox, UpdateSourceTrigger=PropertyChanged}" Value="0">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
             </Grid>
         </Grid>
     </Grid>
