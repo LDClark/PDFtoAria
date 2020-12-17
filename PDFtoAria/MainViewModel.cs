@@ -100,8 +100,7 @@ namespace PDFtoAria
             AppUser = user;
             Directory = ConfigurationManager.AppSettings["importDir"];
             DateOfService = $"/Date({Math.Floor((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)})/";
-            DateEntered = $"/Date({Math.Floor((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)})/";
-            Files = new ObservableCollection<FileViewModel>();
+            DateEntered = $"/Date({Math.Floor((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)})/";     
             AuthoredByUser = new DocumentUser
             {
                 SingleUserId = user.Id
@@ -125,6 +124,7 @@ namespace PDFtoAria
         {
             DirectoryInfo dir = new DirectoryInfo(Directory);
             FileInfo[] fileInfos = dir.GetFiles("*.pdf");
+            Files = new ObservableCollection<FileViewModel>();
             foreach (var file in fileInfos)
             {
                 Files.Add( new FileViewModel
