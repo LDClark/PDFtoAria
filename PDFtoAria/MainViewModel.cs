@@ -1,6 +1,10 @@
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
+using PdfSharp.Pdf;
+using PdfSharp.Pdf.IO;
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -79,20 +83,17 @@ namespace PDFtoAria
             get => _fileFormat;
             set => Set(ref _fileFormat, value);
         }
-        private FileInfo[] _files;
-        public FileInfo[] Files
+        private ObservableCollection<FileViewModel> _files;
+        public ObservableCollection<FileViewModel> Files
         {
             get => _files;
             set => Set(ref _files, value);
         }
-        private FileInfo _selectedFile;
-        public FileInfo SelectedFile
+        public IEnumerable<FileViewModel> SelectedFiles
         {
-            get => _selectedFile;
-            set => Set(ref _selectedFile, value);
+            get { return Files.Where(x => x.IsSelected); }
         }
         public ICommand GetFilesCommand => new RelayCommand(GetFiles);
-        public ICommand GetPDFCommand => new RelayCommand(GetPDF);
         public ICommand UploadToAriaCommand => new RelayCommand(UploadToAria);
         public MainViewModel(User user)
         {
@@ -100,6 +101,7 @@ namespace PDFtoAria
             Directory = ConfigurationManager.AppSettings["importDir"];
             DateOfService = $"/Date({Math.Floor((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)})/";
             DateEntered = $"/Date({Math.Floor((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)})/";
+            Files = new ObservableCollection<FileViewModel>();
             AuthoredByUser = new DocumentUser
             {
                 SingleUserId = user.Id
@@ -122,18 +124,35 @@ namespace PDFtoAria
         public void GetFiles()
         {
             DirectoryInfo dir = new DirectoryInfo(Directory);
-            Files = dir.GetFiles("*.pdf");
-            GetPDF();  //refresh or default loaded
-        }
-        public void GetPDF()
-        {
+            FileInfo[] fileInfos = dir.GetFiles("*.pdf");
+            foreach (var file in fileInfos)
+            {
+                Files.Add( new FileViewModel
+                {
+                    FileName = file.Name,
+                    FullPath = file.FullName,
+                    CreationTime = file.CreationTime
+                });
+            }
             DateOfService = $"/Date({Math.Floor((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)})/";
-            DateEntered = $"/Date({Math.Floor((DateTime.Now - new DateTime(1970, 1, 1)).TotalMilliseconds)})/";
-            TemplateName = SelectedFile.FullName.Split('\\').Last().Split('.').First();
-            BinaryContent = File.ReadAllBytes(SelectedFile.FullName);
+            TemplateName = "";
         }
         public void UploadToAria()
-        {            
+        {
+            PdfDocument outputDocument = new PdfDocument();
+            foreach (FileViewModel file in SelectedFiles)
+            {
+                PdfDocument inputDocument = PdfReader.Open(file.FullPath, PdfDocumentOpenMode.Import);
+                for (int i = 0; i < inputDocument.PageCount; i++)
+                {
+                    PdfPage page = inputDocument.Pages[i];
+                    outputDocument.AddPage(page);
+                }
+            }
+            MemoryStream stream = new MemoryStream();
+            outputDocument.Save(stream, false);
+            BinaryContent = stream.ToArray();
+
             CustomInsertDocumentsParameter.PostDocumentData(PatientId, AppUser,
                 BinaryContent, TemplateName, DocumentType);
         }
